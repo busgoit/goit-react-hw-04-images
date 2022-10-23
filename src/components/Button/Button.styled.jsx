@@ -25,4 +25,13 @@ export const LoadMoreButton = styled.button`
   :focus {
     background-color: #303f9f;
   }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+
+  :disabled:hover,
+  :disabled:focus {
+    background-color: #3f51b5;
+  }
 `;

@@ -1,19 +1,22 @@
 import PropTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem';
 import {
+  ImageGalleryContainer,
   StyledImageGallery,
   StyledImageGalleryItem,
 } from './ImageGallery.styled';
 
 const ImageGallery = ({ pictures, onClick }) => {
   return (
-    <StyledImageGallery>
-      {pictures.map(picture => (
-        <StyledImageGalleryItem key={picture.id}>
-          <ImageGalleryItem picture={picture} onClick={onClick} />
-        </StyledImageGalleryItem>
-      ))}
-    </StyledImageGallery>
+    <ImageGalleryContainer>
+      <StyledImageGallery>
+        {pictures.map(picture => (
+          <StyledImageGalleryItem key={picture.id}>
+            <ImageGalleryItem picture={picture} onClick={onClick} />
+          </StyledImageGalleryItem>
+        ))}
+      </StyledImageGallery>
+    </ImageGalleryContainer>
   );
 };
 

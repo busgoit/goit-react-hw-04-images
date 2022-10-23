@@ -10,6 +10,9 @@ export class App extends Component {
   state = {
     pictures: [],
     page: 1,
+    perPage: 12,
+    totalPages: null,
+    isLastPage: false,
     searchQuery: '',
     isLoading: false,
     error: null,
@@ -18,7 +21,7 @@ export class App extends Component {
   };
 
   async componentDidUpdate(_, prevState) {
-    const { searchQuery, page } = this.state;
+    const { searchQuery, page, perPage } = this.state;
 
     const prevQuery = prevState.searchQuery;
     const prevPage = prevState.page;
@@ -29,11 +32,17 @@ export class App extends Component {
       this.setState({ isLoading: true });
 
       try {
-        const pictures = await API.fetchImagesWithQuery(searchQuery, page);
+        const data = await API.fetchImagesWithQuery(searchQuery, page, perPage);
+        const pictures = data.hits;
+        const totalPages = Math.ceil(data.total / perPage);
+        const isLastPage = page === totalPages ? true : false;
+
         this.setState({
           pictures: isPrevQuery
             ? [...pictures]
             : [...prevPictures, ...pictures],
+          totalPages,
+          isLastPage,
         });
       } catch (error) {
         this.setState({
@@ -71,7 +80,8 @@ export class App extends Component {
   };
 
   render() {
-    const { pictures, isLoading, showModal, modalPicture } = this.state;
+    const { pictures, isLoading, showModal, modalPicture, isLastPage } =
+      this.state;
     const isPictures = pictures && pictures.length > 0 && !isLoading;
 
     return (
@@ -81,7 +91,12 @@ export class App extends Component {
         {isPictures && (
           <ImageGallery onClick={this.getModalImg} pictures={pictures} />
         )}
-        {isPictures && <Button onLoadMoreBtnClick={this.onLoadMoreButton} />}
+        {isPictures && (
+          <Button
+            onLoadMoreBtnClick={this.onLoadMoreButton}
+            isLastPage={isLastPage}
+          />
+        )}
         {showModal && (
           <Modal onClose={this.toggleModal} picture={modalPicture} />
         )}
