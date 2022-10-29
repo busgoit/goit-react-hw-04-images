@@ -13,7 +13,7 @@ export const App = () => {
   const [isLastPage, setIsLastPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalPicture, setModalPicture] = useState(null);
   const perPage = 12;
@@ -37,7 +37,8 @@ export const App = () => {
           setTotalPages(Math.ceil(data.total / perPage));
           setIsLastPage(page === totalPages ? true : false);
         } catch (error) {
-          setError(`Your pictures for ${searchQuery} were not found.`);
+          // setError(`Your pictures for ${searchQuery} were not found.`);
+          console.log(error);
         } finally {
           setIsLoading(false);
         }
