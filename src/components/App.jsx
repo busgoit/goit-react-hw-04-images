@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../services';
 import Searchbar from './Searchbar';
 import Loader from './Loader';
@@ -6,101 +6,77 @@ import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Modal from './Modal';
 
-export class App extends Component {
-  state = {
-    pictures: [],
-    page: 1,
-    perPage: 12,
-    totalPages: null,
-    isLastPage: false,
-    searchQuery: '',
-    isLoading: false,
-    error: null,
-    showModal: false,
-    modalPicture: null,
-  };
+export const App = () => {
+  const [pictures, setPictures] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalPicture, setModalPicture] = useState(null);
+  const perPage = 12;
 
-  async componentDidUpdate(_, prevState) {
-    const { searchQuery, page, perPage } = this.state;
+  useEffect(() => {
+    if (searchQuery !== '') {
+      setIsLoading(true);
 
-    const prevQuery = prevState.searchQuery;
-    const prevPage = prevState.page;
-    const prevPictures = prevState.pictures;
-    const isPrevQuery = prevQuery !== searchQuery;
+      const getImagesByQuery = async searchQuery => {
+        try {
+          const data = await API.fetchImagesWithQuery(
+            searchQuery,
+            page,
+            perPage
+          );
 
-    if (isPrevQuery || prevPage !== page) {
-      this.setState({ isLoading: true });
+          setPictures(prevState =>
+            page > 1 ? [...prevState, ...data.hits] : data.hits
+          );
 
-      try {
-        const data = await API.fetchImagesWithQuery(searchQuery, page, perPage);
-        const pictures = data.hits;
-        const totalPages = Math.ceil(data.total / perPage);
-        const isLastPage = page === totalPages ? true : false;
+          setTotalPages(Math.ceil(data.total / perPage));
+          setIsLastPage(page === totalPages ? true : false);
+        } catch (error) {
+          setError(`Your pictures for ${searchQuery} were not found.`);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-        this.setState({
-          pictures: isPrevQuery
-            ? [...pictures]
-            : [...prevPictures, ...pictures],
-          totalPages,
-          isLastPage,
-        });
-      } catch (error) {
-        this.setState({
-          error: `Your pictures for ${searchQuery} were not found.`,
-        });
-      } finally {
-        this.setState({ isLoading: false });
-      }
+      getImagesByQuery(searchQuery);
     }
-  }
+  }, [searchQuery, page, perPage, totalPages]);
 
-  onFormSubmit = inputValue => {
-    this.setState({
-      pictures: [],
-      page: 1,
-      searchQuery: inputValue,
-    });
+  const onFormSubmit = inputValue => {
+    setPictures([]);
+    setPage(1);
+    setSearchQuery(inputValue);
   };
 
-  onLoadMoreButton = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const onLoadMoreButton = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  getModalImg = picture => {
-    this.setState({ modalPicture: picture });
-    this.toggleModal();
+  const toggleModal = () => {
+    setShowModal(!showModal);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  const getModalImg = picture => {
+    setModalPicture(picture);
+    toggleModal();
   };
 
-  render() {
-    const { pictures, isLoading, showModal, modalPicture, isLastPage } =
-      this.state;
-    const isPictures = pictures && pictures.length > 0 && !isLoading;
+  const isPictures = pictures && pictures.length > 0 && !isLoading;
 
-    return (
-      <>
-        <Searchbar onFormSubmit={this.onFormSubmit} />
-        {isLoading && <Loader />}
-        {isPictures && (
-          <ImageGallery onClick={this.getModalImg} pictures={pictures} />
-        )}
-        {isPictures && (
-          <Button
-            onLoadMoreBtnClick={this.onLoadMoreButton}
-            isLastPage={isLastPage}
-          />
-        )}
-        {showModal && (
-          <Modal onClose={this.toggleModal} picture={modalPicture} />
-        )}
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Searchbar onFormSubmit={onFormSubmit} />
+      {isLoading && <Loader />}
+      {isPictures && <ImageGallery onClick={getModalImg} pictures={pictures} />}
+      {isPictures && (
+        <Button onLoadMoreBtnClick={onLoadMoreButton} isLastPage={isLastPage} />
+      )}
+      {showModal && <Modal onClose={toggleModal} picture={modalPicture} />}
+    </>
+  );
+};
