@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { LoadMoreButton } from './Button.styled';
 
-const Button = ({ onLoadMoreBtnClick, isLastPage }) => {
+const Button = ({ onLoadMoreBtnClick, page, totalPages }) => {
+  const isLastPage = page === totalPages;
+
   return (
     <LoadMoreButton
       onClick={onLoadMoreBtnClick}
@@ -15,7 +17,8 @@ const Button = ({ onLoadMoreBtnClick, isLastPage }) => {
 };
 
 Button.propTypes = {
-  isLastPage: PropTypes.bool.isRequired,
+  page: PropTypes.bool.isRequired,
+  totalPages: PropTypes.bool.isRequired,
   onLoadMoreBtnClick: PropTypes.func.isRequired,
 };
 

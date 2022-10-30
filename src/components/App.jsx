@@ -10,7 +10,6 @@ export const App = () => {
   const [pictures, setPictures] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
-  const [isLastPage, setIsLastPage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   // const [error, setError] = useState(null);
@@ -30,14 +29,11 @@ export const App = () => {
             perPage
           );
 
-          console.log('getImagesByQuery');
-
           setPictures(prevState =>
             page > 1 ? [...prevState, ...data.hits] : data.hits
           );
 
           setTotalPages(Math.ceil(data.total / perPage));
-          setIsLastPage(page === totalPages);
         } catch (error) {
           // setError(`Your pictures for ${searchQuery} were not found.`);
           console.log(error);
@@ -48,7 +44,7 @@ export const App = () => {
 
       getImagesByQuery();
     }
-  }, [searchQuery, page, totalPages]);
+  }, [searchQuery, page]);
 
   const onFormSubmit = inputValue => {
     setPictures([]);
@@ -77,7 +73,11 @@ export const App = () => {
       {isLoading && <Loader />}
       {isPictures && <ImageGallery onClick={getModalImg} pictures={pictures} />}
       {isPictures && (
-        <Button onLoadMoreBtnClick={onLoadMoreButton} isLastPage={isLastPage} />
+        <Button
+          onLoadMoreBtnClick={onLoadMoreButton}
+          page={page}
+          totalPages={totalPages}
+        />
       )}
       {showModal && <Modal onClose={toggleModal} picture={modalPicture} />}
     </>
