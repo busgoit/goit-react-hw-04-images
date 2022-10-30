@@ -22,7 +22,7 @@ export const App = () => {
     if (searchQuery !== '') {
       setIsLoading(true);
 
-      const getImagesByQuery = async searchQuery => {
+      const getImagesByQuery = async () => {
         try {
           const data = await API.fetchImagesWithQuery(
             searchQuery,
@@ -30,12 +30,14 @@ export const App = () => {
             perPage
           );
 
+          console.log('getImagesByQuery');
+
           setPictures(prevState =>
             page > 1 ? [...prevState, ...data.hits] : data.hits
           );
 
           setTotalPages(Math.ceil(data.total / perPage));
-          setIsLastPage(page === totalPages ? true : false);
+          setIsLastPage(page === totalPages);
         } catch (error) {
           // setError(`Your pictures for ${searchQuery} were not found.`);
           console.log(error);
@@ -44,14 +46,14 @@ export const App = () => {
         }
       };
 
-      getImagesByQuery(searchQuery);
+      getImagesByQuery();
     }
-  }, [searchQuery, page, perPage, totalPages]);
+  }, [searchQuery, page, totalPages]);
 
   const onFormSubmit = inputValue => {
     setPictures([]);
-    setPage(1);
     setSearchQuery(inputValue);
+    setPage(1);
   };
 
   const onLoadMoreButton = () => {
